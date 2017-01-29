@@ -94,11 +94,11 @@
     element.setAttribute('x', '100');
     parent.setAttribute('y', '200');
     grandParent.setAttribute('width', '600');
-  	grandParent.setAttribute('height', '600');
+    grandParent.setAttribute('height', '600');
 
     deepEqual(fabric.parseAttributes(element, 'x y width height'.split(' ')),
       { left: 100, top: 200, width: 600, height: 600 });
- });
+  });
 
   asyncTest('parseElements', function() {
     ok(fabric.parseElements);
@@ -122,7 +122,7 @@
         parsedElements = instances;
       });
     }
-    catch(err) {
+    catch (err) {
       error = err;
     }
     ok(error === undefined, 'No error is raised');
@@ -343,12 +343,25 @@
 
     fabric.loadSVGFromString(string, function(objects) {
       rect = objects[0];
-    });
-    
-    setTimeout(function() {
       ok(rect instanceof fabric.Rect);
       start();
-    }, 1000);
+    });
+  });
+
+  asyncTest('parseSVGFromString with svg:namespace', function() {
+    var string = '<?xml version="1.0" standalone="no"?><svg width="100%" height="100%" version="1.1" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+                 '<svg:defs><svg:rect id="myrect" width="300" height="100" style="fill:rgb(0,0,255);stroke-width:1;stroke:rgb(0,0,0)"/></svg:defs>' +
+                 '<svg:use xlink:href="#myrect" x="50" y="50" ></svg:use>' +
+                 '</svg>',
+        rect;
+
+    ok(fabric.loadSVGFromString);
+
+    fabric.loadSVGFromString(string, function(objects) {
+      rect = objects[0];
+      ok(rect instanceof fabric.Rect);
+      start();
+    });
   });
 
   // asyncTest('parseSVGDocument', function() {
@@ -518,7 +531,7 @@
         'strokeWidth': 0.25
       },
       'polygon.cls': {
-        'fill' : '',
+        'fill': '',
         'stroke': '#0000FF'
       }
     };
@@ -528,7 +541,7 @@
 
     var elPolygon = fabric.document.createElement('polygon'),
         expectedStyle = {
-          'fill' : '',
+          'fill': '',
           'stroke': '#0000FF'
         };
 
@@ -536,7 +549,7 @@
     elPolygon.setAttribute('class', 'cls');
     elPolygon.setAttribute('svgUid', svgUid);
 
-    var style = fabric.parseAttributes(elPolygon, [ ]);
+    var style = fabric.parseAttributes(elPolygon, []);
     deepEqual(style, expectedStyle);
 
     styleElement.textContent = '\t\n';
@@ -544,6 +557,36 @@
     svgUid =  'uniqueId2';
     fabric.cssRules[svgUid] = fabric.getCSSRules(doc);
     deepEqual(fabric.cssRules[svgUid], expectedStyle);
+  });
+
+  test('getCssRule with same selectors', function() {
+
+    ok(fabric.getCSSRules);
+
+    var doc = fabric.document,
+        svgUid = 'uniqueId',
+        styleElement = doc.createElement('style');
+
+    styleElement.textContent = '.cls1,.cls2 { fill: #FF0000;} .cls1 { stroke: #00FF00;} .cls3,.cls1 { stroke-width: 3;}';
+
+    doc.body.appendChild(styleElement);
+
+    var expectedObject = {
+      '.cls1': {
+        'fill': '#FF0000',
+        'stroke': '#00FF00',
+        'strokeWidth': 3
+      },
+      '.cls2': {
+        'fill': '#FF0000'
+      },
+      '.cls3': {
+        'strokeWidth': 3
+      }
+    };
+
+    fabric.cssRules[svgUid] = fabric.getCSSRules(doc);
+    deepEqual(fabric.cssRules[svgUid], expectedObject);
   });
 
 })();
