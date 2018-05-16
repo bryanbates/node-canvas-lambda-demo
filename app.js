@@ -7,7 +7,7 @@ exports.handler = function(event, context) {
 
     console.log('Received event:', JSON.stringify(event, null, 2));
 
-    var canvas = fabric.createCanvasForNode(200, 200);
+    var canvas = new fabric.Canvas(null, {width: 200, height: 200})
     console.log('canvas: ', canvas);
 
     var text = new fabric.Text('Hello world', {left: 100, top: 100, fill: '#f55', angle: 15});
